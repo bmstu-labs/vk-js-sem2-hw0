@@ -1,32 +1,38 @@
+'use strict';
+
 /**
- * Объединяет два объекта рекурсинво
- * @param {Object} source - источник
- * @param {Object} target - куда мержим
- * 
- * @example
- * // returns {a: 1, b: {x: 2, y: 3}, c: 4}
- * deepMerge({a: 1, b: {x: 2}}, {b: {y: 3}, c: 4});
- * 
+ * Рекурсивно объединяет два объекта.
+ * Данные копируются из source в target.
+ * @param {Object} target - объект, который дополняем
+ * @param {Object} source - объект-источник данных
  * @returns {Object}
  */
-const deepMerge = (source, target) => {
-    const result = {...source}; // Шардируем
+const deepMerge = (target, source) => {
+    // Поверхностная копия target
+    const result = { ...target };
 
-    for (const key in target) {
-        // Проверяем все эти условия
-        if (
-            Object.prototype.hasOwnProperty.call(target, key) &&
-            source[key] &&
-            typeof source[key] === 'object' &&
-            !Array.isArray(source[key]) &&
-            typeof target[key] === 'object' &&
-            !Array.isArray(target[key])
-        ) {
-            // Рекурсивно мержим
-            result[key] = deepMerge(source[key], target[key]);
+    for (const key in source) {
+        if (!Object.prototype.hasOwnProperty.call(source, key)) {
+            continue;
+        }
+
+        const targetValue = target[key];
+        const sourceValue = source[key];
+
+        const isTargetObject =
+            targetValue !== null &&
+            typeof targetValue === 'object' &&
+            !Array.isArray(targetValue);
+
+        const isSourceObject =
+            sourceValue !== null &&
+            typeof sourceValue === 'object' &&
+            !Array.isArray(sourceValue);
+
+        if (isTargetObject && isSourceObject) {
+            result[key] = deepMerge(targetValue, sourceValue);
         } else {
-            // Просто добавялем 
-            result[key] = target[key];
+            result[key] = sourceValue;
         }
     }
 
